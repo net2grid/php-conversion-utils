@@ -47,7 +47,7 @@ class Numeric {
 
 	private static function ensureOnlyHexCharactersIn($strippedHexString) {
 		if (! ctype_xdigit($strippedHexString))
-			throw new InvalidArgumentException("Hex string contains illegal character");
+			throw new InvalidArgumentException("Invalid hex string provided.");
 	}
 
 	private static function forEachCharacterRightToLeft($aString, $callback) {
