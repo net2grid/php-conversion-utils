@@ -64,14 +64,30 @@ class Numeric {
 	}
 
 	public static function hexFromDecimal($decimalValue) {
-		$remainder = $decimalValue;
+		$base16Values = self::baseNDecimalArrayFromDecimal($decimalValue, 16);
 		$hexString = "";
-		while ($remainder != 0) {
-			$hexChar = dechex(bcmod($remainder, 16));
-			$hexString = $hexChar . $hexString;
-			$remainder = bcdiv($remainder, 16, 0);
+		foreach ($base16Values as $value) {
+			$hexString .=  dechex($value);
 		}
 		return $hexString;
 	}
+
+
+	public static function decimalByteArrayFromDecimal($decimalValue) {
+		return self::baseNDecimalArrayFromDecimal($decimalValue, 256);
+	}
+
+
+	private static function baseNDecimalArrayFromDecimal($decimalValue, $base) {
+		$remainder = $decimalValue;
+		$values = [];
+		while($remainder != 0) {
+			$value = bcmod($remainder, $base);
+			array_unshift($values, $value);
+			$remainder = bcdiv($remainder, $base, 0);
+		}
+		return $values;
+	}
+
 
 }

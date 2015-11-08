@@ -118,4 +118,16 @@ class NumericTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, $converted);
 	}
 
+	/**
+	 * @test
+	 */
+	public function decimalStringIsConvertedToDecimalByteArray() {
+		$decimalString = "3233056047";
+		$converted = Numeric::decimalByteArrayFromDecimal($decimalString);
+
+		$expected = [192, 180, 133, 47];
+		$this->assertEquals($expected, $converted);
+
+	}
+
 }
