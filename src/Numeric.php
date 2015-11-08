@@ -26,16 +26,9 @@ class Numeric {
 	public static function decimalFromHex($hexString) {
 		$strippedHexString = self::strippedHexString($hexString);
 		self::ensureOnlyHexCharactersIn($strippedHexString);
-		$decimalValue = 0;
-		self::forEachCharacterRightToLeft($strippedHexString,
-			function($character, $indexFromRight) use (&$decimalValue){
-				$decimalValue = bcadd(
-					$decimalValue,
-					self::valueOfNthHexCharacterFromRight($character, $indexFromRight)
-				);
-			}
-		);
-		return $decimalValue;
+
+		$decimals = self::base16DecimalArrayFromHex($strippedHexString);
+		return self::decimalFromBaseNDecimalArray($decimals, 16);
 	}
 
 	private static function strippedHexString($hexString) {
@@ -50,17 +43,15 @@ class Numeric {
 			throw new InvalidArgumentException("Invalid hex string provided.");
 	}
 
-	private static function forEachCharacterRightToLeft($aString, $callback) {
-		$stringLength = strlen($aString);
-		for ($indexFromRight = 0; $indexFromRight < $stringLength; $indexFromRight++) {
-			$character = substr($aString, (-1 -$indexFromRight), 1);
-			$callback($character, $indexFromRight);
-		}
-	}
 
-	private static function valueOfNthHexCharacterFromRight($character, $indexFromRight) {
-		$value = bcmul(hexdec($character) , bcpow(16, $indexFromRight));
-		return $value;
+	private static function base16DecimalArrayFromHex($hexString) {
+		$decimals = [];
+		$stringLength = strlen($hexString);
+		for ($i = 0; $i < $stringLength; $i++) {
+			$character = substr($hexString, $i, 1);
+			$decimals []= hexdec($character);
+		}
+		return $decimals;
 	}
 
 	public static function hexFromDecimal($decimalValue) {
@@ -77,7 +68,6 @@ class Numeric {
 		return self::baseNDecimalArrayFromDecimal($decimalValue, 256);
 	}
 
-
 	private static function baseNDecimalArrayFromDecimal($decimalValue, $base) {
 		$remainder = $decimalValue;
 		$values = [];
@@ -87,6 +77,32 @@ class Numeric {
 			$remainder = bcdiv($remainder, $base, 0);
 		}
 		return $values;
+	}
+
+
+	public static function decimalFromDecimalByteArray(array $bytes) {
+		return self::decimalFromBaseNDecimalArray($bytes, 256);
+	}
+
+
+	private static function decimalFromBaseNDecimalArray(array $decimals, $base) {
+		$decimalValue = 0;
+		$length = count($decimals);
+		for ($indexFromEnd = 0; $indexFromEnd < $length; $indexFromEnd++) {
+			$decimalValue = bcadd(
+					$decimalValue,
+					self::valueOfNthDecimalValueFromEndOfBaseNArray(
+							$decimals[$length - $indexFromEnd - 1],
+							$indexFromEnd,
+							$base
+					)
+			);
+		}
+		return $decimalValue;
+	}
+
+	private static function valueOfNthDecimalValueFromEndOfBaseNArray($decimalVAlue, $indexFromEnd, $base) {
+		return bcmul($decimalVAlue, bcpow($base, $indexFromEnd));
 	}
 
 
